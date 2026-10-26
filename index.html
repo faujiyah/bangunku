@@ -1,0 +1,1002 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>BANGUNKU - Ayo Kenali Bentuk di Sekitarmu!</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Mengutamakan Comic Sans MS untuk kesan ramah anak */
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap');
+
+        :root {
+            --primary: #FF6B6B;
+            --secondary: #4ECDC4;
+            --accent: #FFE66D;
+            --dark: #2C3E50;
+            --light: #F7FFF7;
+        }
+
+        body {
+            font-family: 'Comic Sans MS', 'Chalkboard SE', 'Comic Neue', 'Nunito', sans-serif;
+            background: linear-gradient(180deg, #87CEEB 0%, #E0F6FF 100%);
+            min-height: 100vh;
+            color: var(--dark);
+            overflow-x: hidden;
+            touch-action: manipulation;
+        }
+
+        /* Decorative background elements */
+        .bg-decor { position: fixed; z-index: -1; opacity: 0.6; }
+
+        /* Fun Animations */
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+        @keyframes bounce-in {
+            0% { transform: scale(0.1); opacity: 0; }
+            60% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(1); }
+        }
+        @keyframes pop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        @keyframes roll-right {
+            0% { transform: translateX(-20px) rotate(0deg); }
+            50% { transform: translateX(20px) rotate(180deg); }
+            100% { transform: translateX(-20px) rotate(360deg); }
+        }
+        @keyframes rock-static {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(-5deg); }
+            75% { transform: rotate(5deg); }
+        }
+
+        .animate-float { animation: float 3s ease-in-out infinite; }
+        .animate-bounce-in { animation: bounce-in 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        .animate-pop:active { animation: pop 0.2s; }
+        .animate-shake { animation: shake 0.4s; }
+        .animate-roll { animation: roll-right 3s linear infinite; }
+        .animate-rock { animation: rock-static 2s ease-in-out infinite; }
+
+        /* Custom UI Elements */
+        .btn-fun {
+            background: linear-gradient(to bottom, #FF8787, #FF6B6B);
+            border-bottom: 4px solid #D63031;
+            transition: all 0.1s;
+            text-shadow: 1px 1px 0px rgba(0,0,0,0.2);
+        }
+        .btn-fun:active {
+            transform: translateY(4px);
+            border-bottom: 0px solid #D63031;
+            margin-bottom: 4px;
+        }
+
+        .btn-menu {
+            background: white;
+            border-radius: 20px;
+            border-bottom: 5px solid #E2E8F0;
+            transition: all 0.2s;
+        }
+        .btn-menu:active { transform: translateY(5px); border-bottom: 0px; }
+        .card-3d {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            border: 2px solid white;
+        }
+        
+        .mascot-container {
+            position: fixed; bottom: -20px; right: 20px; width: 120px; height: 120px; z-index: 50; transition: transform 0.3s;
+        }
+        .speech-bubble {
+            position: absolute; bottom: 110px; right: 80px; background: white;
+            border: 3px solid var(--secondary); border-radius: 20px; padding: 10px 15px;
+            font-size: 14px; font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            width: max-content; max-width: 250px; opacity: 0; transform: scale(0);
+            transition: all 0.3s; pointer-events: none;
+        }
+        .speech-bubble.show { opacity: 1; transform: scale(1); }
+        .speech-bubble::after {
+            content: ''; position: absolute; bottom: -10px; right: 20px;
+            border-width: 10px 10px 0; border-style: solid; border-color: white transparent transparent transparent;
+        }
+        .speech-bubble::before {
+            content: ''; position: absolute; bottom: -14px; right: 17px;
+            border-width: 13px 13px 0; border-style: solid; border-color: var(--secondary) transparent transparent transparent;
+        }
+
+        .modal-overlay { background: rgba(0,0,0,0.5); backdrop-filter: blur(3px); }
+        .game-slot { border: 3px dashed #CBD5E1; border-radius: 15px; transition: all 0.2s; }
+        .game-slot.active { border-color: var(--secondary); background: rgba(78, 205, 196, 0.2); }
+        .draggable-item { cursor: pointer; touch-action: none; transition: transform 0.2s; }
+        .draggable-item:hover { transform: scale(1.05); }
+        .draggable-item.selected { filter: drop-shadow(0 0 12px var(--accent)); transform: scale(1.15); border-color: #FBBF24; }
+        .page-section { display: none; }
+        .page-section.active { display: block; }
+
+        /* Style for HOTS hover */
+        .hots-choice:hover .hots-svg { transform: scale(1.1) rotate(5deg); transition: transform 0.3s; }
+    </style>
+</head>
+<body class="antialiased">
+
+    <svg class="bg-decor" style="top: 10%; left: 5%; width: 100px;" viewBox="0 0 100 100"><path d="M20,50 Q40,20 60,50 T100,50 L100,100 L0,100 Z" fill="white" opacity="0.5"/></svg>
+    <svg class="bg-decor" style="top: 30%; right: 10%; width: 150px;" viewBox="0 0 100 100"><path d="M20,50 Q40,30 60,50 T100,50 L100,100 L0,100 Z" fill="white" opacity="0.4"/></svg>
+
+    <!-- Header -->
+    <header id="main-header" class="fixed top-0 left-0 w-full p-4 z-40 hidden justify-between items-center bg-white/80 backdrop-blur-md shadow-sm">
+        <button onclick="nav.goHome()" class="bg-blue-500 text-white p-2 rounded-full shadow-md animate-pop hover:bg-blue-600 transition">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+        </button>
+        <div class="flex items-center gap-3">
+            <div id="user-badge" class="bg-yellow-300 px-4 py-1 rounded-full font-bold text-yellow-800 shadow-sm border-2 border-yellow-400">
+                ⭐ <span id="badge-name">Nama</span>
+            </div>
+            <button onclick="audio.toggleMute()" id="mute-btn" class="bg-gray-200 p-2 rounded-full shadow-md text-xl">🔊</button>
+        </div>
+    </header>
+
+    <!-- Maskot Kubi -->
+    <div id="mascot" class="mascot-container animate-float hidden" onclick="mascot.cheer()">
+        <div id="mascot-speech" class="speech-bubble text-center text-dark">Halo! Aku Kubi!</div>
+        <svg viewBox="0 0 200 200" width="100%" height="100%">
+            <polygon points="100,20 170,55 170,135 100,170 30,135 30,55" fill="#4ECDC4" stroke="#2C3E50" stroke-width="4"/>
+            <polygon points="100,20 170,55 100,90 30,55" fill="#A8E6CF" stroke="#2C3E50" stroke-width="4"/>
+            <polygon points="100,90 170,55 170,135 100,170" fill="#38B2AC" stroke="#2C3E50" stroke-width="4"/>
+            <ellipse cx="60" cy="110" rx="8" ry="12" fill="#2C3E50"/>
+            <circle cx="62" cy="107" r="3" fill="white"/>
+            <ellipse cx="90" cy="125" rx="8" ry="12" fill="#2C3E50"/>
+            <circle cx="92" cy="122" r="3" fill="white"/>
+            <path d="M 65 135 Q 75 145 85 140" fill="none" stroke="#2C3E50" stroke-width="3" stroke-linecap="round"/>
+            <path d="M 30 95 Q 10 90 20 70" fill="none" stroke="#2C3E50" stroke-width="4" stroke-linecap="round"/>
+            <path d="M 135 150 Q 155 160 170 145" fill="none" stroke="#2C3E50" stroke-width="4" stroke-linecap="round"/>
+        </svg>
+    </div>
+
+    <!-- MAIN CONTAINER -->
+    <main id="app-container" class="pt-20 pb-24 px-4 max-w-4xl mx-auto w-full">
+
+        <!-- ================= PAGE 0: LOGIN ================= -->
+        <section id="page-login" class="page-section active flex flex-col items-center justify-center min-h-[80vh]">
+            <div class="text-center mb-8 animate-bounce-in">
+                <h1 class="text-5xl md:text-6xl font-black text-white drop-shadow-[0_4px_4px_rgba(0,0,0,0.2)] mb-2 tracking-widest" style="-webkit-text-stroke: 2px #2C3E50;">BANGUNKU</h1>
+                <p class="text-xl md:text-2xl font-bold text-dark bg-yellow-300 inline-block px-6 py-2 rounded-full border-2 border-dark shadow-md">Ayo Kenali Bentuk di Sekitarmu!</p>
+            </div>
+            <div class="card-3d p-8 w-full max-w-md animate-bounce-in" style="animation-delay: 0.2s;">
+                <h2 class="text-2xl font-bold mb-4 text-center text-blue-600">Siapa namamu?</h2>
+                <input type="text" id="input-name" placeholder="Tulis namamu di sini..." class="w-full p-4 border-4 border-blue-200 rounded-xl mb-4 text-xl font-bold text-center focus:border-blue-500 outline-none transition font-sans">
+                <h2 class="text-xl font-bold mb-2 text-center text-green-600">Kelas berapa?</h2>
+                <div class="flex justify-center gap-4 mb-6">
+                    <button class="class-btn flex-1 p-3 border-4 border-gray-200 rounded-xl font-bold text-xl hover:border-green-400 transition" onclick="app.selectClass(this, '1')">Kelas 1</button>
+                    <button class="class-btn flex-1 p-3 border-4 border-green-500 bg-green-100 rounded-xl font-bold text-xl transition" onclick="app.selectClass(this, '2')">Kelas 2</button>
+                    <button class="class-btn flex-1 p-3 border-4 border-gray-200 rounded-xl font-bold text-xl hover:border-green-400 transition" onclick="app.selectClass(this, '3')">Kelas 3</button>
+                </div>
+                <button onclick="app.login()" class="btn-fun w-full py-4 text-white text-2xl font-black rounded-xl">AYO MULAI! 🚀</button>
+            </div>
+            <button onclick="nav.showPage('page-guru-login')" class="mt-8 text-gray-500 font-bold opacity-30 hover:opacity-100 transition">👩‍🏫 Area Guru</button>
+        </section>
+
+        <!-- ================= PAGE 1: BERANDA ================= -->
+        <section id="page-menu" class="page-section">
+            <h2 class="text-3xl font-black text-center mb-6 text-blue-800 bg-white/50 px-6 py-2 rounded-full mx-auto block w-max shadow-sm">Pilih Petualanganmu!</h2>
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
+                <button onclick="nav.go('page-intro')" class="btn-menu p-4 flex flex-col items-center gap-2 group">
+                    <div class="text-5xl group-hover:scale-110 transition-transform">🌟</div><span class="font-bold text-lg text-dark">Apa Itu?</span>
+                </button>
+                <button onclick="nav.go('page-kenali')" class="btn-menu p-4 flex flex-col items-center gap-2 group">
+                    <div class="text-5xl group-hover:scale-110 transition-transform">🔍</div><span class="font-bold text-lg text-dark">Kenali Bentuk</span>
+                </button>
+                <button onclick="nav.go('page-sekitarku')" class="btn-menu p-4 flex flex-col items-center gap-2 group">
+                    <div class="text-5xl group-hover:scale-110 transition-transform">🎁</div><span class="font-bold text-lg text-dark">Di Sekitarku</span>
+                </button>
+                <button onclick="nav.go('page-bandingkan')" class="btn-menu p-4 flex flex-col items-center gap-2 group">
+                    <div class="text-5xl group-hover:scale-110 transition-transform">⚖️</div><span class="font-bold text-lg text-dark">Bandingkan</span>
+                </button>
+                <button onclick="nav.go('page-bermain')" class="btn-menu p-4 flex flex-col items-center gap-2 group">
+                    <div class="text-5xl group-hover:scale-110 transition-transform">🎮</div><span class="font-bold text-lg text-dark">Bermain</span>
+                </button>
+                <button onclick="nav.go('page-hots')" class="btn-menu p-4 flex flex-col items-center gap-2 group">
+                    <div class="text-5xl group-hover:scale-110 transition-transform">🧠</div><span class="font-bold text-lg text-dark">Berpikir</span>
+                </button>
+                <button onclick="nav.go('page-kuis')" class="btn-menu p-4 flex flex-col items-center gap-2 group md:col-span-1 col-span-2 bg-yellow-100 border-yellow-300">
+                    <div class="text-5xl group-hover:scale-110 transition-transform">📝</div><span class="font-bold text-lg text-dark">Kuis Seru</span>
+                </button>
+                <button onclick="nav.go('page-hasil')" class="btn-menu p-4 flex flex-col items-center gap-2 group md:col-span-2 col-span-2 bg-green-100 border-green-300">
+                    <div class="text-5xl group-hover:scale-110 transition-transform">🏆</div><span class="font-bold text-lg text-dark">Pialaku</span>
+                </button>
+            </div>
+        </section>
+
+        <!-- ================= PAGE 2: APA ITU ================= -->
+        <section id="page-intro" class="page-section">
+            <div class="card-3d p-6 text-center animate-bounce-in">
+                <h2 class="text-3xl font-black text-purple-600 mb-6">Apa itu Bangun Ruang?</h2>
+                <div class="flex flex-col md:flex-row items-center justify-center gap-8 mb-8">
+                    <div class="flex-1 bg-gray-100 p-4 rounded-xl">
+                        <div class="w-32 h-32 bg-blue-300 mx-auto mb-4 border-2 border-blue-500 shadow-sm flex items-center justify-center">
+                            <span class="font-bold text-white text-2xl">Gepeng</span>
+                        </div>
+                        <h3 class="font-bold text-xl text-red-500 mb-2">Bangun Datar</h3>
+                        <p class="text-gray-700 font-bold">Seperti gambar di kertas. Cuma bisa dilihat, tipis, dan tidak ada isinya.</p>
+                    </div>
+                    <div class="text-4xl font-black text-gray-400">VS</div>
+                    <div class="flex-1 bg-yellow-50 p-4 rounded-xl border-4 border-yellow-300 shadow-lg transform hover:scale-105 transition">
+                        <div class="w-32 h-32 mx-auto mb-4 animate-float" id="svg-intro-cube"></div>
+                        <h3 class="font-bold text-2xl text-green-600 mb-2">Bangun Ruang!</h3>
+                        <p class="text-gray-700 font-bold">Gendut! Punya isi di dalamnya, bisa dipegang, dan bentuknya nyata.</p>
+                    </div>
+                </div>
+                <div class="bg-blue-100 p-4 rounded-xl flex items-center gap-4 cursor-pointer hover:bg-blue-200 transition" onclick="audio.speak('Bangun ruang adalah benda gendut yang punya isi. Seperti kotak kado, bola, atau kaleng susu!')">
+                    <button class="text-4xl animate-pop">🔊</button>
+                    <p class="text-lg font-bold text-blue-800 text-left">Hari ini kita belajar 5 bentuk keren yang sering kamu lihat setiap hari! (Klik untuk dengar)</p>
+                </div>
+                <button onclick="nav.go('page-kenali')" class="mt-6 btn-fun px-8 py-3 text-white font-bold rounded-full text-xl inline-flex items-center gap-2">
+                    Lanjut <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                </button>
+            </div>
+        </section>
+
+        <!-- ================= PAGE 3: KENALI BENTUK ================= -->
+        <section id="page-kenali" class="page-section">
+            <h2 class="text-3xl font-black text-center mb-4 text-blue-800">Kenali Bentuknya</h2>
+            <div class="flex flex-wrap justify-center gap-3 mb-6" id="shape-selector"></div>
+            <div class="card-3d p-6 relative overflow-hidden">
+                <button onclick="audio.speakShapeDetails()" class="absolute top-4 right-4 text-3xl bg-yellow-200 hover:bg-yellow-300 p-3 rounded-full shadow-lg animate-pop">🔊</button>
+                <div class="flex flex-col md:flex-row items-center gap-8 mt-4">
+                    <div class="w-56 h-56 md:w-72 md:h-72 flex-shrink-0 animate-float drop-shadow-xl" id="active-shape-svg"></div>
+                    <div class="flex-1 w-full text-center md:text-left">
+                        <h3 id="shape-name" class="text-5xl font-black mb-2 text-blue-600 uppercase tracking-wider">Kubus</h3>
+                        <p id="shape-desc" class="text-xl text-gray-700 mb-6 font-bold bg-blue-50 p-3 rounded-lg border border-blue-100"></p>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="bg-red-100 p-3 rounded-xl border-b-4 border-red-300">
+                                <span class="block text-sm text-red-600 font-bold">Sisi (Tembok)</span>
+                                <span id="shape-sisi" class="text-2xl font-black text-red-800">6 Datar</span>
+                            </div>
+                            <div class="bg-blue-100 p-3 rounded-xl border-b-4 border-blue-300">
+                                <span class="block text-sm text-blue-600 font-bold">Sudut (Pojokan)</span>
+                                <span id="shape-sudut" class="text-2xl font-black text-blue-800">8</span>
+                            </div>
+                            <div class="bg-green-100 p-3 rounded-xl border-b-4 border-green-300">
+                                <span class="block text-sm text-green-600 font-bold">Bisa Gelinding?</span>
+                                <span id="shape-roll" class="text-2xl font-black text-green-800">Tidak</span>
+                            </div>
+                             <div class="bg-yellow-100 p-3 rounded-xl border-b-4 border-yellow-300">
+                                <span class="block text-sm text-yellow-600 font-bold">Contoh Benda</span>
+                                <span id="shape-contoh" class="text-lg font-black text-yellow-800 leading-tight block mt-1">Dadu, Kado</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= PAGE 4: SEKITARKU ================= -->
+        <section id="page-sekitarku" class="page-section">
+            <h2 class="text-3xl font-black text-center mb-2 text-purple-800">Benda di Sekitarku</h2>
+            <p class="text-center font-bold text-gray-700 mb-6 bg-white/70 px-4 py-1 rounded-full mx-auto block w-max">Sentuh benda untuk tahu bentuknya!</p>
+            <div class="grid grid-cols-3 md:grid-cols-4 gap-3 md:gap-4" id="real-world-grid"></div>
+
+            <div id="modal-benda" class="fixed inset-0 modal-overlay z-50 hidden flex items-center justify-center px-4">
+                <div class="bg-white rounded-3xl p-6 max-w-sm w-full text-center shadow-2xl transform transition-transform scale-90 border-4 border-blue-400">
+                    <div id="modal-benda-img" class="w-40 h-40 mx-auto mb-4 drop-shadow-md"></div>
+                    <h3 id="modal-benda-title" class="text-3xl font-black text-dark mb-2">Nama Benda</h3>
+                    <p id="modal-benda-desc" class="text-2xl font-bold text-blue-600 mb-6 bg-blue-100 py-3 rounded-xl uppercase tracking-wide">Berbentuk KUBUS</p>
+                    <button onclick="document.getElementById('modal-benda').classList.add('hidden')" class="btn-fun w-full py-4 text-white font-black rounded-xl text-2xl">Oke, Tutup!</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= PAGE 5: BANDINGKAN (REVISI INTERAKTIF) ================= -->
+        <section id="page-bandingkan" class="page-section">
+            <h2 class="text-3xl font-black text-center mb-6 text-green-800 bg-white/50 px-6 py-2 rounded-full mx-auto block w-max shadow-sm">Bandingkan Yuk! ⚖️</h2>
+            <p class="text-center font-bold mb-6 text-gray-700">Pilih dua bentuk untuk melihat perbedaannya!</p>
+
+            <div class="flex justify-between items-stretch gap-2 md:gap-6 mb-6">
+                <!-- Selector 1 -->
+                <div class="flex-1 card-3d p-3 text-center bg-blue-50 border-4 border-blue-200">
+                    <select id="compare-1" class="w-full p-2 font-black text-blue-800 bg-white border-2 border-blue-300 rounded-xl outline-none text-center text-xl cursor-pointer shadow-inner" onchange="compare.update()">
+                        <option value="kubus">Kubus</option>
+                        <option value="balok">Balok</option>
+                        <option value="tabung">Tabung</option>
+                        <option value="kerucut">Kerucut</option>
+                        <option value="bola">Bola</option>
+                    </select>
+                    <div id="comp-img-1" class="w-28 h-28 mx-auto my-4 drop-shadow-lg transition-transform duration-500"></div>
+                </div>
+                <div class="text-4xl font-black text-yellow-500 flex items-center justify-center drop-shadow-md">VS</div>
+                <!-- Selector 2 -->
+                <div class="flex-1 card-3d p-3 text-center bg-red-50 border-4 border-red-200">
+                    <select id="compare-2" class="w-full p-2 font-black text-red-800 bg-white border-2 border-red-300 rounded-xl outline-none text-center text-xl cursor-pointer shadow-inner" onchange="compare.update()">
+                        <option value="kubus">Kubus</option>
+                        <option value="balok">Balok</option>
+                        <option value="tabung">Tabung</option>
+                        <option value="kerucut">Kerucut</option>
+                        <option value="bola" selected>Bola</option>
+                    </select>
+                    <div id="comp-img-2" class="w-28 h-28 mx-auto my-4 drop-shadow-lg transition-transform duration-500"></div>
+                </div>
+            </div>
+
+            <!-- Enhanced Visual Comparison Table -->
+            <div class="card-3d overflow-hidden border-4 border-gray-200">
+                <table class="w-full text-center border-collapse">
+                    <thead>
+                        <tr class="bg-gray-100 border-b-4 border-gray-300">
+                            <th class="p-4 font-black text-left w-1/3 text-gray-700 text-lg">Cek Ciri-cirinya</th>
+                            <th class="p-4 font-black text-blue-600 w-1/3 text-2xl uppercase" id="th-1">Kubus</th>
+                            <th class="p-4 font-black text-red-600 w-1/3 text-2xl uppercase" id="th-2">Bola</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-lg font-bold text-gray-700">
+                        <tr class="border-b-2 border-gray-100">
+                            <td class="p-4 text-left bg-gray-50 flex items-center gap-2">📐 <span class="leading-tight">Sudut (Pojokan)</span></td>
+                            <td class="p-4 text-2xl" id="td-sudut-1"></td>
+                            <td class="p-4 text-2xl" id="td-sudut-2"></td>
+                        </tr>
+                        <tr class="border-b-2 border-gray-100">
+                            <td class="p-4 text-left bg-gray-50 flex items-center gap-2">🌙 <span class="leading-tight">Sisi Lengkung</span></td>
+                            <td class="p-4" id="td-lengkung-1"></td>
+                            <td class="p-4" id="td-lengkung-2"></td>
+                        </tr>
+                        <tr class="bg-blue-50">
+                            <td class="p-4 text-left font-black text-blue-800 flex items-center gap-2">🎢 <span class="leading-tight">Ditaruh di perosotan?</span></td>
+                            <td class="p-4" id="td-roll-1"></td>
+                            <td class="p-4" id="td-roll-2"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="text-center mt-6">
+                 <button onclick="audio.speak('Bentuk yang melengkung bisa menggelinding seperti roda. Jika lurus dan datar, dia akan diam atau merosot saja.')" class="bg-yellow-300 hover:bg-yellow-400 text-yellow-900 font-black px-6 py-3 rounded-full shadow-md animate-pop text-lg border-b-4 border-yellow-500 transition-all">🔊 Penjelasan Kubi</button>
+            </div>
+        </section>
+
+        <!-- ================= PAGE 6: BERMAIN (REVISI - BANYAK ITEM) ================= -->
+        <section id="page-bermain" class="page-section">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-3xl font-black text-orange-600">Rapikan Mainan! 🧸</h2>
+                <div class="bg-yellow-300 px-4 py-2 rounded-full font-black text-yellow-800 border-2 border-yellow-500 shadow-sm text-lg">Skor: <span id="game-score">0</span>/<span id="game-max">10</span></div>
+            </div>
+            <p class="text-center font-bold mb-4 bg-white/80 rounded-xl py-2 shadow-sm text-gray-700">Pilih mainan di bawah, lalu TAP keranjang yang bentuknya sama!</p>
+
+            <div class="grid grid-cols-5 gap-2 mb-6 bg-white/50 p-2 rounded-2xl" id="game-bins"></div>
+
+            <div class="card-3d p-5 bg-blue-50 border-4 border-blue-300 min-h-[200px]">
+                <div class="flex justify-between items-center mb-3">
+                    <h3 class="font-black text-blue-600 text-lg">Mainan yang berantakan:</h3>
+                    <button onclick="game.init()" class="text-sm bg-blue-200 text-blue-800 px-3 py-1 rounded-full font-bold hover:bg-blue-300">🔄 Acak Lagi</button>
+                </div>
+                <div class="flex flex-wrap justify-center gap-3 md:gap-4" id="game-items"></div>
+            </div>
+            
+            <div class="text-center mt-6 hidden fixed inset-0 bg-white/90 z-50 flex-col items-center justify-center backdrop-blur-sm" id="game-win">
+                <div class="text-8xl mb-4 animate-bounce">🎉🏆🎉</div>
+                <h3 class="text-5xl font-black text-green-500 mb-4 text-shadow">Luar Biasa!</h3>
+                <p class="text-2xl font-bold text-gray-700 mb-8">Semua mainan sudah rapi!</p>
+                <button onclick="game.init()" class="btn-fun px-10 py-4 text-white font-black rounded-full text-2xl shadow-xl">Main Lagi Yuk!</button>
+            </div>
+        </section>
+
+        <!-- ================= PAGE 7: BERPIKIR (REVISI - VISUAL BOLA) ================= -->
+        <section id="page-hots" class="page-section">
+            <h2 class="text-3xl font-black text-center mb-6 text-indigo-700 bg-white/50 px-6 py-2 rounded-full mx-auto block w-max">Ayo Berpikir! 🧠</h2>
+
+            <div class="card-3d p-6 relative border-4 border-indigo-200">
+                <button onclick="audio.speak('Budi ingin membuat menara yang tinggi. Bangun mana yang paling cocok diletakkan di paling bawah agar menaranya tegak dan tidak mudah roboh?')" class="absolute top-4 right-4 text-3xl bg-yellow-200 hover:bg-yellow-300 p-2 rounded-full shadow-md animate-pop z-10">🔊</button>
+                
+                <div class="mb-6 mt-4">
+                    <h3 class="text-2xl font-bold mb-8 pr-12 text-gray-800 leading-snug">Budi ingin menyusun mainannya menjadi menara yang tinggi. <br><br><span class="text-indigo-600">Bangun mana yang paling cocok diletakkan di paling bawah agar menaranya tegak berdiri dan tidak roboh?</span></h3>
+                    
+                    <div class="flex justify-center gap-6 md:gap-12 mb-6">
+                        <!-- Pilihan Bola -->
+                        <div class="hots-choice text-center cursor-pointer" onclick="hots.answer('bola')">
+                            <div class="w-36 h-36 mx-auto bg-red-50 rounded-2xl p-3 border-4 border-red-200 hover:border-red-500 shadow-sm transition-all hots-svg flex items-center justify-center" id="hots-bola-opt"></div>
+                            <span class="font-black mt-3 block text-2xl text-red-600 bg-white border-2 border-red-200 rounded-full py-1 px-4">Bola ⚽</span>
+                        </div>
+                        <div class="text-3xl font-black text-gray-300 flex items-center">ATAU</div>
+                        <!-- Pilihan Balok -->
+                        <div class="hots-choice text-center cursor-pointer" onclick="hots.answer('balok')">
+                            <div class="w-36 h-36 mx-auto bg-green-50 rounded-2xl p-3 border-4 border-green-200 hover:border-green-500 shadow-sm transition-all hots-svg flex items-center justify-center" id="hots-balok-opt"></div>
+                            <span class="font-black mt-3 block text-2xl text-green-600 bg-white border-2 border-green-200 rounded-full py-1 px-4">Balok 🧱</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="hots-feedback" class="hidden p-6 rounded-2xl text-center font-bold text-xl animate-bounce-in shadow-inner border-2"></div>
+                <div class="text-center mt-6">
+                    <button onclick="nav.go('page-kuis')" class="btn-fun px-8 py-4 text-white font-black rounded-full text-2xl hidden shadow-lg animate-pulse" id="hots-next">Mantap! Lanjut ke Kuis 📝</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= PAGE 8 & 9 & 10 Tetap Serupa (dengan penyesuaian gaya) ================= -->
+        <section id="page-kuis" class="page-section">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-3xl font-black text-red-600 bg-white/60 px-4 py-1 rounded-full shadow-sm">Kuis Seru! 📝</h2>
+                <div class="bg-blue-200 px-4 py-2 rounded-full font-black text-blue-900 border-2 border-blue-400 shadow-sm text-lg">Soal <span id="quiz-current">1</span>/10</div>
+            </div>
+            <div class="card-3d p-6 relative min-h-[350px] flex flex-col justify-center border-4 border-blue-200">
+                <button onclick="quiz.speakQuestion()" class="absolute top-4 right-4 text-3xl bg-yellow-200 hover:bg-yellow-300 p-2 rounded-full shadow-md animate-pop">🔊</button>
+                <div id="quiz-question-container" class="text-center mt-4">
+                    <h3 id="quiz-question" class="text-2xl font-bold mb-8 text-dark pr-12 leading-relaxed">Pertanyaan...</h3>
+                    <div id="quiz-options" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+                </div>
+                <!-- Feedback Overlay -->
+                <div id="quiz-feedback" class="absolute inset-0 bg-white/95 rounded-2xl hidden flex-col items-center justify-center p-6 text-center z-10 backdrop-blur-sm border-4 border-green-400">
+                    <div id="quiz-feedback-icon" class="text-7xl mb-4 animate-bounce">✅</div>
+                    <h4 id="quiz-feedback-title" class="text-4xl font-black mb-3">Benar!</h4>
+                    <p id="quiz-feedback-desc" class="text-xl font-bold text-gray-700 mb-8 bg-gray-100 p-4 rounded-xl border-2 border-gray-200">Penjelasan</p>
+                    <button onclick="quiz.next()" class="btn-fun px-10 py-4 text-white font-black rounded-full text-2xl shadow-lg">Lanjut Soal >></button>
+                </div>
+            </div>
+            <div class="w-full bg-white rounded-full h-6 mt-6 border-4 border-blue-200 shadow-inner overflow-hidden relative">
+                <div id="quiz-progress" class="bg-gradient-to-r from-green-400 to-green-500 h-full transition-all duration-500 relative" style="width: 10%">
+                    <div class="absolute inset-0 bg-white/20 w-full h-full" style="background-image: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(255,255,255,0.3) 10px, rgba(255,255,255,0.3) 20px);"></div>
+                </div>
+            </div>
+        </section>
+
+        <section id="page-hasil" class="page-section">
+            <h2 class="text-4xl font-black text-center mb-6 text-yellow-600 drop-shadow-md" style="-webkit-text-stroke: 1px white;">Pialaku 🏆</h2>
+            <div class="card-3d p-8 text-center bg-gradient-to-b from-white to-yellow-50 border-4 border-yellow-300">
+                <h3 class="text-3xl font-black text-gray-700 mb-4">Kerja Bagus, <br><span class="display-name text-blue-600 text-4xl">Nama</span>!</h3>
+                <div id="result-stars" class="text-7xl mb-4 flex justify-center gap-2 drop-shadow-lg"></div>
+                <div class="text-7xl font-black text-green-500 mb-2 drop-shadow-md" id="result-score">100</div>
+                <p class="font-bold text-gray-600 mb-8 bg-white inline-block px-6 py-2 rounded-full border-2 border-gray-200 text-xl shadow-sm">Skor Kuis</p>
+                <div class="grid grid-cols-2 gap-4 mb-8 text-left">
+                    <div class="bg-blue-100 p-4 rounded-2xl border-2 border-blue-200 shadow-sm">
+                        <p class="font-bold text-blue-800 text-sm">Bentuk Favoritku:</p>
+                        <select class="w-full bg-white p-2 rounded-xl mt-2 font-bold text-gray-700 border-2 border-blue-200 outline-none">
+                            <option>Kubus 🧊</option><option>Balok 🧱</option><option>Tabung 🥫</option><option>Kerucut 🍦</option><option>Bola ⚽</option>
+                        </select>
+                    </div>
+                    <div class="bg-green-100 p-4 rounded-2xl border-2 border-green-200 shadow-sm">
+                        <p class="font-bold text-green-800 text-sm">Perasaanku Hari Ini:</p>
+                        <select class="w-full bg-white p-2 rounded-xl mt-2 font-bold text-gray-700 border-2 border-green-200 outline-none">
+                            <option>Senang! 😄</option><option>Biasa Saja 😐</option><option>Susah 😟</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="flex flex-col md:flex-row gap-4 justify-center">
+                    <button onclick="quiz.start()" class="btn-fun px-6 py-4 text-white font-black rounded-xl text-xl flex-1 shadow-md">Ulangi Kuis 🔄</button>
+                    <button onclick="nav.goHome()" class="bg-white text-gray-800 border-4 border-gray-300 px-6 py-4 font-black rounded-xl text-xl hover:bg-gray-100 transition flex-1 shadow-md">Menu Utama 🏠</button>
+                </div>
+            </div>
+        </section>
+
+        <section id="page-guru-login" class="page-section">
+            <div class="card-3d p-8 max-w-sm mx-auto mt-20 text-center border-4 border-gray-300">
+                <h2 class="text-3xl font-black mb-4 text-gray-700">Akses Guru 👩‍🏫</h2>
+                <p class="text-gray-500 mb-6 font-bold">Masukkan PIN (1234)</p>
+                <input type="password" id="guru-pin" class="w-full p-4 border-4 border-gray-300 rounded-xl mb-6 text-center text-4xl tracking-[0.5em] font-sans outline-none focus:border-blue-400" placeholder="****" maxlength="4">
+                <div class="flex gap-3">
+                    <button onclick="nav.go('page-login')" class="flex-1 p-3 bg-gray-200 rounded-xl font-bold border-b-4 border-gray-300">Batal</button>
+                    <button onclick="guru.login()" class="flex-1 btn-fun text-white rounded-xl font-bold">Masuk</button>
+                </div>
+                <p id="guru-error" class="text-red-500 font-bold mt-4 hidden text-lg bg-red-100 py-2 rounded-lg border border-red-300">PIN Salah!</p>
+            </div>
+        </section>
+
+        <section id="page-guru-dashboard" class="page-section max-w-full">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-3xl font-black text-dark">Data Siswa</h2>
+                <div class="flex gap-2">
+                    <button onclick="guru.exportCSV()" class="bg-green-500 text-white px-4 py-2 rounded-lg font-bold border-b-4 border-green-700 hover:mt-1 hover:border-b-0">Unduh CSV</button>
+                    <button onclick="nav.goHome()" class="bg-red-500 text-white px-4 py-2 rounded-lg font-bold border-b-4 border-red-700 hover:mt-1 hover:border-b-0">Keluar</button>
+                </div>
+            </div>
+            <div class="bg-white rounded-xl shadow-md overflow-x-auto border-4 border-gray-200">
+                <table class="w-full text-left border-collapse min-w-[600px]">
+                    <thead>
+                        <tr class="bg-gray-100 text-lg">
+                            <th class="p-4 border-b-2 border-gray-300 font-black">Nama</th>
+                            <th class="p-4 border-b-2 border-gray-300 font-black">Kelas</th>
+                            <th class="p-4 border-b-2 border-gray-300 font-black">Skor Kuis</th>
+                            <th class="p-4 border-b-2 border-gray-300 font-black">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="guru-table-body" class="font-bold text-gray-700"></tbody>
+                </table>
+            </div>
+            <div class="mt-6 text-right">
+                <button onclick="guru.clearData()" class="text-red-500 font-bold hover:underline bg-red-50 px-4 py-2 rounded-lg border border-red-200">Hapus Semua Data</button>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // --- ASSETS (SVGS DIMODIFIKASI LEBIH 3D) ---
+        const SVGS = {
+            // Bangun Ruang Utama (Peningkatan Efek 3D)
+            kubus: `<svg viewBox="0 0 100 100" width="100%" height="100%"><polygon points="50,15 85,30 85,75 50,90 15,75 15,30" fill="#3B82F6"/><polygon points="50,15 85,30 50,45 15,30" fill="#93C5FD"/><polygon points="50,45 85,30 85,75 50,90" fill="#60A5FA"/><polygon points="15,30 50,45 50,90 15,75" fill="#1D4ED8"/></svg>`,
+            balok: `<svg viewBox="0 0 100 100" width="100%" height="100%"><polygon points="25,25 90,40 90,85 25,70 10,55 10,10" fill="none"/><polygon points="25,25 90,40 75,55 10,40" fill="#6EE7B7"/><polygon points="75,55 90,40 90,85 75,100" fill="#34D399"/><polygon points="10,40 75,55 75,100 10,85" fill="#059669"/></svg>`,
+            tabung: `<svg viewBox="0 0 100 100" width="100%" height="100%"><defs><linearGradient id="gradT" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#CA8A04"/><stop offset="30%" stop-color="#FEF08A"/><stop offset="70%" stop-color="#EAB308"/><stop offset="100%" stop-color="#854D0E"/></linearGradient><linearGradient id="gradTTop" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#FEF08A"/><stop offset="100%" stop-color="#EAB308"/></linearGradient></defs><path d="M 25 25 L 25 75 A 25 12 0 0 0 75 75 L 75 25 Z" fill="url(#gradT)"/><ellipse cx="50" cy="25" rx="25" ry="12" fill="url(#gradTTop)" stroke="#CA8A04" stroke-width="1"/></svg>`,
+            kerucut: `<svg viewBox="0 0 100 100" width="100%" height="100%"><defs><linearGradient id="gradK" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#EA580C"/><stop offset="40%" stop-color="#FDBA74"/><stop offset="100%" stop-color="#9A3412"/></linearGradient></defs><path d="M 50 15 L 80 75 A 30 12 0 0 1 20 75 Z" fill="url(#gradK)"/><ellipse cx="50" cy="75" rx="30" ry="12" fill="#C2410C" opacity="0.8"/></svg>`,
+            bola: `<svg viewBox="0 0 100 100" width="100%" height="100%"><defs><radialGradient id="gradB" cx="30%" cy="30%" r="70%"><stop offset="0%" stop-color="#FCA5A5"/><stop offset="25%" stop-color="#EF4444"/><stop offset="80%" stop-color="#991B1B"/><stop offset="100%" stop-color="#450A0A"/></radialGradient></defs><circle cx="50" cy="50" r="42" fill="url(#gradB)"/></svg>`,
+            
+            // 16 Benda Sehari-hari untuk 'Ayo Bermain' (Lebih Bervariasi)
+            dadu: `<svg viewBox="0 0 100 100" width="100%" height="100%"><polygon points="50,15 85,30 85,75 50,90 15,75 15,30" fill="#f0f0f0" stroke="#ccc" stroke-width="2"/><polygon points="50,15 85,30 50,45 15,30" fill="#ffffff"/><polygon points="50,45 85,30 85,75 50,90" fill="#e0e0e0"/><polygon points="15,30 50,45 50,90 15,75" fill="#d0d0d0"/><circle cx="50" cy="32" r="4" fill="#ef4444"/><circle cx="67" cy="48" r="4" fill="#10b981"/><circle cx="67" cy="68" r="4" fill="#10b981"/><circle cx="33" cy="48" r="4" fill="#3b82f6"/><circle cx="33" cy="68" r="4" fill="#3b82f6"/><circle cx="33" cy="80" r="4" fill="#3b82f6"/></svg>`,
+            rubik: `<svg viewBox="0 0 100 100" width="100%" height="100%"><polygon points="50,15 85,30 50,45 15,30" fill="#FFD700"/><polygon points="50,45 85,30 85,75 50,90" fill="#FF4500"/><polygon points="15,30 50,45 50,90 15,75" fill="#1E90FF"/><line x1="27" y1="37" x2="62" y2="52" stroke="#333" stroke-width="2"/><line x1="39" y1="41" x2="74" y2="56" stroke="#333" stroke-width="2"/><line x1="39" y1="20" x2="74" y2="35" stroke="#333" stroke-width="2"/><line x1="27" y1="25" x2="62" y2="40" stroke="#333" stroke-width="2"/><line x1="27" y1="25" x2="39" y2="41" stroke="#333" stroke-width="2"/><line x1="62" y1="40" x2="74" y2="56" stroke="#333" stroke-width="2"/></svg>`, // Simplified rubik lines
+            kardus: `<svg viewBox="0 0 100 100" width="100%" height="100%"><polygon points="25,25 90,40 75,55 10,40" fill="#D2B48C"/><polygon points="75,55 90,40 90,85 75,100" fill="#DEB887"/><polygon points="10,40 75,55 75,100 10,85" fill="#C19A6B"/><line x1="42" y1="47" x2="42" y2="92" stroke="#8B4513" stroke-width="2"/><path d="M 10 40 L 42 47" stroke="#8B4513" stroke-width="2"/></svg>`,
+            balok_kayu: `<svg viewBox="0 0 100 100" width="100%" height="100%"><polygon points="25,25 90,40 75,55 10,40" fill="#CD853F"/><polygon points="75,55 90,40 90,85 75,100" fill="#F4A460"/><polygon points="10,40 75,55 75,100 10,85" fill="#D2691E"/><path d="M 20 60 Q 40 50 60 70" stroke="#A0522D" stroke-width="1" fill="none"/><path d="M 30 80 Q 50 70 70 90" stroke="#A0522D" stroke-width="1" fill="none"/></svg>`,
+            buku: `<svg viewBox="0 0 100 100" width="100%" height="100%"><polygon points="25,20 85,35 70,50 10,35" fill="#DC2626"/><polygon points="70,50 85,35 85,80 70,95" fill="#fff" stroke="#ccc"/><polygon points="10,35 70,50 70,95 10,80" fill="#B91C1C"/><line x1="72" y1="52" x2="83" y2="39" stroke="#ddd" stroke-width="1"/><line x1="74" y1="55" x2="83" y2="44" stroke="#ddd" stroke-width="1"/></svg>`,
+            kotak_susu: `<svg viewBox="0 0 100 100" width="100%" height="100%"><polygon points="30,30 70,30 70,90 30,90" fill="#fff" stroke="#3B82F6" stroke-width="2"/><polygon points="30,30 50,15 70,30" fill="#3B82F6"/><path d="M 30 50 Q 50 70 70 50 L 70 90 L 30 90 Z" fill="#60A5FA"/><circle cx="50" cy="70" r="10" fill="#fff"/><text x="44" y="74" font-size="12" fill="#1D4ED8" font-weight="bold">M</text></svg>`,
+            kaleng_susu: `<svg viewBox="0 0 100 100" width="100%" height="100%"><path d="M 25 25 L 25 75 A 25 10 0 0 0 75 75 L 75 25 Z" fill="#D1D5DB"/><ellipse cx="50" cy="25" rx="25" ry="10" fill="#E5E7EB" stroke="#9CA3AF"/><path d="M 25 40 L 75 40 L 75 60 L 25 60 Z" fill="#10B981"/><text x="35" y="54" font-size="12" fill="white" font-weight="bold">MILK</text></svg>`,
+            gelas: `<svg viewBox="0 0 100 100" width="100%" height="100%"><path d="M 30 20 L 35 80 A 15 5 0 0 0 65 80 L 70 20 Z" fill="#bae6fd" opacity="0.8"/><ellipse cx="50" cy="20" rx="20" ry="5" fill="#e0f2fe" stroke="#38bdf8"/><path d="M 32 40 L 34 75 A 16 4 0 0 0 66 75 L 68 40 Z" fill="#fb923c"/><ellipse cx="50" cy="40" rx="18" ry="4" fill="#fdba74"/></svg>`,
+            drum: `<svg viewBox="0 0 100 100" width="100%" height="100%"><path d="M 25 25 L 25 75 A 25 10 0 0 0 75 75 L 75 25 Z" fill="#1E3A8A"/><ellipse cx="50" cy="25" rx="25" ry="10" fill="#2563EB"/><line x1="25" y1="40" x2="75" y2="40" stroke="#000" stroke-width="2"/><line x1="25" y1="60" x2="75" y2="60" stroke="#000" stroke-width="2"/></svg>`,
+            topi_ultah: `<svg viewBox="0 0 100 100" width="100%" height="100%"><path d="M 50 20 L 80 80 A 30 10 0 0 1 20 80 Z" fill="#F472B6"/><ellipse cx="50" cy="80" rx="30" ry="10" fill="#DB2777"/><circle cx="50" cy="15" r="8" fill="#FBBF24"/><path d="M 35 50 L 65 50" stroke="white" stroke-width="4" stroke-dasharray="4,4"/></svg>`,
+            tumpeng: `<svg viewBox="0 0 100 100" width="100%" height="100%"><ellipse cx="50" cy="85" rx="40" ry="12" fill="#15803D"/><path d="M 50 15 L 75 80 A 25 8 0 0 1 25 80 Z" fill="#FACC15"/><path d="M 45 15 L 55 15 L 60 80 L 40 80 Z" fill="#EAB308" opacity="0.5"/></svg>`,
+            corong: `<svg viewBox="0 0 100 100" width="100%" height="100%"><path d="M 20 20 L 45 60 L 45 90 L 55 90 L 55 60 L 80 20 Z" fill="#EF4444"/><ellipse cx="50" cy="20" rx="30" ry="8" fill="#FCA5A5" stroke="#B91C1C"/></svg>`,
+            bola_sepak: `<svg viewBox="0 0 100 100" width="100%" height="100%"><circle cx="50" cy="50" r="40" fill="#fff" stroke="#333" stroke-width="2"/><polygon points="50,20 70,35 62,60 38,60 30,35" fill="#111"/><polygon points="15,40 30,35 38,60 25,80" fill="none" stroke="#333" stroke-width="2"/><polygon points="85,40 70,35 62,60 75,80" fill="none" stroke="#333" stroke-width="2"/><polygon points="38,60 62,60 50,85" fill="none" stroke="#333" stroke-width="2"/></svg>`,
+            jeruk: `<svg viewBox="0 0 100 100" width="100%" height="100%"><circle cx="50" cy="55" r="35" fill="#F97316"/><circle cx="40" cy="45" r="8" fill="#FB923C" opacity="0.5"/><path d="M 50 20 Q 60 10 70 20 Q 60 30 50 20 Z" fill="#16A34A"/><path d="M 50 20 Q 55 25 50 25" stroke="#15803D" stroke-width="2" fill="none"/></svg>`,
+            kelereng: `<svg viewBox="0 0 100 100" width="100%" height="100%"><defs><radialGradient id="gradKel" cx="40%" cy="40%" r="60%"><stop offset="0%" stop-color="#fff"/><stop offset="30%" stop-color="#A7F3D0"/><stop offset="100%" stop-color="#059669"/></radialGradient></defs><circle cx="50" cy="50" r="30" fill="url(#gradKel)"/><path d="M 35 50 Q 50 20 65 50 Q 50 80 35 50 Z" fill="#047857" opacity="0.6"/></svg>`,
+            globe: `<svg viewBox="0 0 100 100" width="100%" height="100%"><circle cx="50" cy="50" r="38" fill="#3B82F6"/><path d="M 30 30 Q 50 20 60 40 Q 70 60 50 70 Q 30 80 20 50 Z" fill="#22C55E"/><path d="M 70 30 Q 80 40 75 50 Q 65 60 60 50 Z" fill="#22C55E"/><path d="M 50 12 L 50 5 M 50 88 L 50 95" stroke="#555" stroke-width="4"/><path d="M 20 95 Q 50 100 80 95" fill="none" stroke="#555" stroke-width="4"/></svg>`
+        };
+
+        const shapesData = {
+            kubus: { id: 'kubus', name: 'Kubus', desc: 'Semua sisinya kotak (persegi) yang besarnya sama.', sisi: '6 Datar', sudut: '8', rusuk: '12', roll: '❌ Tidak', icon: SVGS.kubus, color: 'blue', ex: 'Dadu, Rubik, Kotak Kado' },
+            balok: { id: 'balok', name: 'Balok', desc: 'Bentuknya memanjang seperti lemari atau kotak sepatu.', sisi: '6 Datar', sudut: '8', rusuk: '12', roll: '❌ Tidak', icon: SVGS.balok, color: 'green', ex: 'Kotak Susu, Buku, Lemari' },
+            tabung: { id: 'tabung', name: 'Tabung', desc: 'Atas dan bawahnya lingkaran, badannya melengkung lurus.', sisi: '2 Datar, 1 Lengkung', sudut: '0', rusuk: '2 Lengkung', roll: '✅ Ya', icon: SVGS.tabung, color: 'yellow', ex: 'Kaleng, Gelas, Drum' },
+            kerucut: { id: 'kerucut', name: 'Kerucut', desc: 'Bawahnya lingkaran, atasnya runcing (punya puncak).', sisi: '1 Datar, 1 Lengkung', sudut: '0 (1 puncak)', rusuk: '1 Lengkung', roll: '✅ Ya (Melingkar)', icon: SVGS.kerucut, color: 'orange', ex: 'Topi Ultah, Tumpeng' },
+            bola: { id: 'bola', name: 'Bola', desc: 'Bulat sempurna, tidak punya pojokan atau sisi datar.', sisi: '1 Lengkung', sudut: '0', rusuk: '0', roll: '✅ Ya (Ke segala arah)', icon: SVGS.bola, color: 'red', ex: 'Bola Sepak, Jeruk, Kelereng' }
+        };
+
+        // 16 Benda Sehari-hari
+        const realWorldItemsPool = [
+            { id: 'rw1', name: 'Dadu', shape: 'kubus', svg: SVGS.dadu },
+            { id: 'rw2', name: 'Rubik', shape: 'kubus', svg: SVGS.rubik },
+            { id: 'rw3', name: 'Kardus', shape: 'balok', svg: SVGS.kardus },
+            { id: 'rw4', name: 'Balok Kayu', shape: 'balok', svg: SVGS.balok_kayu },
+            { id: 'rw5', name: 'Buku', shape: 'balok', svg: SVGS.buku },
+            { id: 'rw6', name: 'Kotak Susu', shape: 'balok', svg: SVGS.kotak_susu },
+            { id: 'rw7', name: 'Kaleng Susu', shape: 'tabung', svg: SVGS.kaleng_susu },
+            { id: 'rw8', name: 'Gelas', shape: 'tabung', svg: SVGS.gelas },
+            { id: 'rw9', name: 'Drum', shape: 'tabung', svg: SVGS.drum },
+            { id: 'rw10', name: 'Topi Ultah', shape: 'kerucut', svg: SVGS.topi_ultah },
+            { id: 'rw11', name: 'Tumpeng', shape: 'kerucut', svg: SVGS.tumpeng },
+            { id: 'rw12', name: 'Corong', shape: 'kerucut', svg: SVGS.corong },
+            { id: 'rw13', name: 'Bola Sepak', shape: 'bola', svg: SVGS.bola_sepak },
+            { id: 'rw14', name: 'Jeruk', shape: 'bola', svg: SVGS.jeruk },
+            { id: 'rw15', name: 'Kelereng', shape: 'bola', svg: SVGS.kelereng },
+            { id: 'rw16', name: 'Globe', shape: 'bola', svg: SVGS.globe }
+        ];
+
+        const state = { user: { name: '', class: '' }, isMuted: false };
+
+        // --- AUDIO SYSTEM ---
+        const audio = {
+            ctx: null,
+            init() {
+                if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+                if (this.ctx.state === 'suspended') this.ctx.resume();
+            },
+            playTone(freq, type, duration, vol = 0.1) {
+                if (state.isMuted || !this.ctx) return;
+                const osc = this.ctx.createOscillator(); const gain = this.ctx.createGain();
+                osc.type = type; osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+                gain.gain.setValueAtTime(vol, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + duration);
+                osc.connect(gain); gain.connect(this.ctx.destination);
+                osc.start(); osc.stop(this.ctx.currentTime + duration);
+            },
+            click() { this.init(); this.playTone(600, 'sine', 0.1, 0.05); },
+            pop() { this.init(); this.playTone(900, 'square', 0.05, 0.05); },
+            win() { 
+                this.init();
+                setTimeout(() => this.playTone(400, 'triangle', 0.1, 0.1), 0);
+                setTimeout(() => this.playTone(600, 'triangle', 0.1, 0.1), 100);
+                setTimeout(() => this.playTone(800, 'triangle', 0.3, 0.1), 200);
+            },
+            wrong() { this.init(); this.playTone(200, 'sawtooth', 0.3, 0.1); },
+            speak(text) {
+                if (state.isMuted) return;
+                if ('speechSynthesis' in window) {
+                    window.speechSynthesis.cancel();
+                    const u = new SpeechSynthesisUtterance(text);
+                    u.lang = 'id-ID'; u.rate = 0.9; u.pitch = 1.2;
+                    window.speechSynthesis.speak(u);
+                }
+            },
+            speakShapeDetails() {
+                const s = state.activeShapeInfo;
+                if(s) this.speak(`${s.name}. ${s.desc} Sisinya ${s.sisi}.`);
+            },
+            toggleMute() {
+                state.isMuted = !state.isMuted;
+                document.getElementById('mute-btn').innerText = state.isMuted ? '🔇' : '🔊';
+                if(state.isMuted && 'speechSynthesis' in window) window.speechSynthesis.cancel();
+            }
+        };
+
+        const mascot = {
+            el: null, bubble: null,
+            init() { this.el = document.getElementById('mascot'); this.bubble = document.getElementById('mascot-speech'); },
+            show() { this.el.classList.remove('hidden'); }, hide() { this.el.classList.add('hidden'); },
+            say(text, time = 3000) {
+                this.bubble.innerText = text; this.bubble.classList.add('show'); audio.pop();
+                setTimeout(() => this.bubble.classList.remove('show'), time);
+            },
+            cheer() {
+                this.el.classList.add('animate-pop');
+                this.say(["Hebat!", "Ayo Semangat!", "Kamu Pintar!", "Luar Biasa!"][Math.floor(Math.random()*4)]);
+                setTimeout(() => this.el.classList.remove('animate-pop'), 200);
+            }
+        };
+
+        const nav = {
+            go(pageId) {
+                audio.click();
+                document.querySelectorAll('.page-section').forEach(el => el.classList.remove('active'));
+                document.getElementById(pageId).classList.add('active');
+                window.scrollTo(0,0);
+                
+                const header = document.getElementById('main-header');
+                if (pageId === 'page-login' || pageId === 'page-guru-login') {
+                    header.classList.add('hidden'); header.classList.remove('flex'); mascot.hide();
+                } else {
+                    header.classList.remove('hidden'); header.classList.add('flex'); mascot.show();
+                    if(pageId === 'page-menu') mascot.say(`Halo ${state.user.name}, mau main apa?`);
+                }
+
+                if (pageId === 'page-kenali' && !state.kenaliLoaded) { kenali.init(); state.kenaliLoaded = true; }
+                if (pageId === 'page-sekitarku' && !state.sekitarkuLoaded) { sekitarku.init(); state.sekitarkuLoaded = true; }
+                if (pageId === 'page-bermain') game.init();
+                if (pageId === 'page-bandingkan') compare.update();
+                if (pageId === 'page-kuis') quiz.reset();
+            },
+            goHome() { this.go('page-menu'); }
+        };
+
+        const app = {
+            init() {
+                document.getElementById('svg-intro-cube').innerHTML = SVGS.kubus;
+                document.getElementById('comp-img-1').innerHTML = SVGS.kubus;
+                document.getElementById('comp-img-2').innerHTML = SVGS.bola;
+                document.getElementById('hots-bola-opt').innerHTML = SVGS.bola;
+                document.getElementById('hots-balok-opt').innerHTML = SVGS.balok;
+                mascot.init();
+                document.querySelectorAll('button').forEach(btn => { if(!btn.hasAttribute('onclick')) btn.addEventListener('click', () => audio.click()); });
+                const saved = localStorage.getItem('bangunku_currentUser');
+                if(saved) {
+                    const u = JSON.parse(saved);
+                    document.getElementById('input-name').value = u.name;
+                    state.user = u;
+                }
+            },
+            selectClass(btn, cls) {
+                audio.click();
+                document.querySelectorAll('.class-btn').forEach(b => b.classList.remove('border-green-500', 'bg-green-100'));
+                btn.classList.add('border-green-500', 'bg-green-100');
+                state.user.class = cls;
+            },
+            login() {
+                const name = document.getElementById('input-name').value.trim();
+                if(!name) { audio.wrong(); mascot.say("Tulis namamu dulu ya!"); return; }
+                if(!state.user.class) state.user.class = '2';
+                state.user.name = name;
+                document.getElementById('badge-name').innerText = name;
+                document.querySelectorAll('.display-name').forEach(el => el.innerText = name);
+                localStorage.setItem('bangunku_currentUser', JSON.stringify(state.user));
+                this.saveToDB(name, state.user.class, 0);
+                audio.win(); nav.go('page-menu');
+            },
+            saveToDB(name, cls, score) {
+                let db = JSON.parse(localStorage.getItem('bangunku_db') || '[]');
+                let userIndex = db.findIndex(u => u.name.toLowerCase() === name.toLowerCase());
+                if(userIndex >= 0) {
+                    db[userIndex].score = Math.max(db[userIndex].score, score);
+                    db[userIndex].lastLogin = new Date().toLocaleString();
+                } else db.push({name, class: cls, score, lastLogin: new Date().toLocaleString()});
+                localStorage.setItem('bangunku_db', JSON.stringify(db));
+            }
+        };
+
+        const kenali = {
+            init() {
+                const sel = document.getElementById('shape-selector'); sel.innerHTML = '';
+                Object.values(shapesData).forEach(s => {
+                    const btn = document.createElement('button');
+                    btn.className = `w-16 h-16 md:w-20 md:h-20 rounded-2xl bg-white border-4 border-gray-200 p-2 transition-transform hover:scale-110 focus:outline-none drop-shadow-sm`;
+                    btn.innerHTML = s.icon;
+                    btn.onclick = () => this.select(s.id, btn);
+                    sel.appendChild(btn);
+                });
+                this.select('kubus', sel.firstChild);
+            },
+            select(id, btn) {
+                audio.pop();
+                document.getElementById('shape-selector').childNodes.forEach(b => b.classList.replace('border-'+shapesData[id].color+'-400', 'border-gray-200'));
+                btn.classList.replace('border-gray-200', 'border-'+shapesData[id].color+'-400');
+                const s = shapesData[id]; state.activeShapeInfo = s;
+                
+                const svgContainer = document.getElementById('active-shape-svg');
+                svgContainer.innerHTML = s.icon;
+                svgContainer.classList.remove('animate-float'); void svgContainer.offsetWidth; svgContainer.classList.add('animate-pop');
+                setTimeout(() => { svgContainer.classList.remove('animate-pop'); svgContainer.classList.add('animate-float'); }, 200);
+
+                document.getElementById('shape-name').innerText = s.name;
+                document.getElementById('shape-name').className = `text-5xl font-black mb-2 text-${s.color}-600 uppercase tracking-wider`;
+                document.getElementById('shape-desc').innerText = s.desc;
+                document.getElementById('shape-sisi').innerText = s.sisi;
+                document.getElementById('shape-sudut').innerText = s.sudut;
+                document.getElementById('shape-roll').innerText = s.roll;
+                document.getElementById('shape-contoh').innerText = s.ex;
+                audio.speak(s.name);
+            }
+        };
+
+        const sekitarku = {
+            init() {
+                const grid = document.getElementById('real-world-grid'); grid.innerHTML = '';
+                // Use all 16 items for gallery
+                realWorldItemsPool.forEach(item => {
+                    const div = document.createElement('div');
+                    div.className = "bg-white p-3 md:p-4 rounded-2xl shadow-sm border-4 border-transparent hover:border-blue-300 transition-all cursor-pointer transform hover:-translate-y-1 text-center";
+                    div.innerHTML = `<div class="w-16 h-16 md:w-20 md:h-20 mx-auto mb-2 drop-shadow-sm">${item.svg}</div><span class="font-bold text-gray-800 text-sm md:text-base">${item.name}</span>`;
+                    div.onclick = () => this.showModal(item);
+                    grid.appendChild(div);
+                });
+            },
+            showModal(item) {
+                audio.pop();
+                const shape = shapesData[item.shape];
+                document.getElementById('modal-benda-img').innerHTML = item.svg;
+                document.getElementById('modal-benda-title').innerText = item.name;
+                document.getElementById('modal-benda-desc').innerText = `Bentuk ${shape.name}`;
+                document.getElementById('modal-benda-desc').className = `text-2xl font-black mb-6 py-3 rounded-xl text-${shape.color}-800 bg-${shape.color}-100 uppercase tracking-wide border-2 border-${shape.color}-300`;
+                document.getElementById('modal-benda').classList.remove('hidden');
+                audio.speak(`${item.name} berbentuk ${shape.name}`);
+                mascot.say(`Itu ${shape.name}!`);
+            }
+        };
+
+        // --- REVISI BANDINGKAN (Interactive Animations) ---
+        const compare = {
+            update() {
+                const s1 = shapesData[document.getElementById('compare-1').value];
+                const s2 = shapesData[document.getElementById('compare-2').value];
+                
+                const c1 = document.getElementById('comp-img-1');
+                const c2 = document.getElementById('comp-img-2');
+                c1.innerHTML = s1.icon; c2.innerHTML = s2.icon;
+                
+                document.getElementById('th-1').innerText = s1.name;
+                document.getElementById('th-2').innerText = s2.name;
+                document.getElementById('th-1').className = `p-4 font-black w-1/3 text-2xl uppercase text-${s1.color}-600`;
+                document.getElementById('th-2').className = `p-4 font-black w-1/3 text-2xl uppercase text-${s2.color}-600`;
+
+                const checkLengkung = (s) => s.sisi.toLowerCase().includes('lengkung') ? `<span class="text-green-600">✅ Ada</span>` : `<span class="text-red-500">❌ Tidak</span>`;
+                const checkSudut = (s) => s.sudut === '0' ? `<span class="text-red-500">0</span>` : `<span class="text-blue-600">${s.sudut}</span>`;
+                
+                document.getElementById('td-lengkung-1').innerHTML = checkLengkung(s1);
+                document.getElementById('td-lengkung-2').innerHTML = checkLengkung(s2);
+                document.getElementById('td-sudut-1').innerHTML = checkSudut(s1);
+                document.getElementById('td-sudut-2').innerHTML = checkSudut(s2);
+
+                // Animations for Rolling vs Static
+                const renderRoll = (s, imgEl) => {
+                    imgEl.classList.remove('animate-roll', 'animate-rock');
+                    if(s.roll.includes('❌')) {
+                        imgEl.classList.add('animate-rock'); // just rocks a bit
+                        return `<div class="bg-red-100 text-red-800 px-4 py-2 rounded-xl border-2 border-red-300 font-bold inline-block">Diam ⏹️</div>`;
+                    }
+                    imgEl.classList.add('animate-roll'); // continuous spin/roll
+                    return `<div class="bg-green-100 text-green-800 px-4 py-2 rounded-xl border-2 border-green-400 font-black inline-block shadow-md">MENGGELINDING! 💨</div>`;
+                };
+
+                document.getElementById('td-roll-1').innerHTML = renderRoll(s1, c1);
+                document.getElementById('td-roll-2').innerHTML = renderRoll(s2, c2);
+                
+                audio.pop();
+            }
+        };
+
+        // --- REVISI BERMAIN (Banyak Benda) ---
+        const game = {
+            selectedItemId: null, score: 0, items: [], maxItems: 10, // Increased to 10
+            init() {
+                this.score = 0; this.selectedItemId = null;
+                document.getElementById('game-score').innerText = '0';
+                document.getElementById('game-max').innerText = this.maxItems;
+                document.getElementById('game-win').classList.add('hidden');
+                
+                const binsContainer = document.getElementById('game-bins'); binsContainer.innerHTML = '';
+                Object.values(shapesData).forEach(s => {
+                    const bin = document.createElement('div');
+                    bin.className = `game-slot p-2 md:p-3 flex flex-col items-center justify-center cursor-pointer bg-white shadow-inner hover:bg-gray-50`;
+                    bin.dataset.shape = s.id;
+                    bin.innerHTML = `<div class="w-12 h-12 md:w-16 md:h-16 mb-2 opacity-60 pointer-events-none">${s.icon}</div><span class="text-sm font-black text-gray-500 uppercase bg-gray-100 px-2 rounded-full pointer-events-none">${s.name}</span>`;
+                    bin.onclick = () => this.handleBinClick(s.id, bin);
+                    binsContainer.appendChild(bin);
+                });
+
+                // Pick 10 random items from pool
+                let shuffled = [...realWorldItemsPool].sort(() => 0.5 - Math.random());
+                this.items = shuffled.slice(0, this.maxItems).map(i => ({...i, matched: false}));
+                this.renderItems();
+                mascot.say("Ayo kelompokkan mainan yang bentuknya sama!");
+            },
+            renderItems() {
+                const container = document.getElementById('game-items'); container.innerHTML = '';
+                this.items.forEach(item => {
+                    if(item.matched) return;
+                    const div = document.createElement('div');
+                    div.className = `draggable-item w-20 h-20 md:w-24 md:h-24 bg-white rounded-2xl shadow-md p-3 border-4 border-transparent`;
+                    if(this.selectedItemId === item.id) div.classList.add('selected');
+                    div.innerHTML = item.svg;
+                    div.onclick = () => this.selectItem(item.id);
+                    container.appendChild(div);
+                });
+            },
+            selectItem(id) {
+                audio.pop(); this.selectedItemId = id; this.renderItems(); mascot.say("Sekarang TAP keranjangnya!");
+            },
+            handleBinClick(shapeId, binEl) {
+                if(!this.selectedItemId) return;
+                const item = this.items.find(i => i.id === this.selectedItemId);
+                if(item.shape === shapeId) {
+                    audio.win(); item.matched = true; this.score++;
+                    document.getElementById('game-score').innerText = this.score;
+                    this.selectedItemId = null;
+                    binEl.classList.add('bg-green-100', 'border-green-400', 'animate-pop');
+                    setTimeout(() => binEl.classList.remove('bg-green-100', 'border-green-400', 'animate-pop'), 500);
+                    this.renderItems(); mascot.say("Yey! Betul sekali!");
+                    if(this.score === this.maxItems) {
+                        setTimeout(() => { document.getElementById('game-win').classList.remove('hidden'); mascot.cheer(); audio.win(); }, 500);
+                    }
+                } else {
+                    audio.wrong();
+                    binEl.classList.add('bg-red-100', 'border-red-500', 'animate-shake');
+                    setTimeout(() => binEl.classList.remove('bg-red-100', 'border-red-500', 'animate-shake'), 400);
+                    mascot.say("Ups! Coba lihat lagi bentuknya.");
+                    this.selectedItemId = null; this.renderItems();
+                }
+            }
+        };
+
+        const hots = {
+            answer(ans) {
+                const fb = document.getElementById('hots-feedback');
+                fb.classList.remove('hidden', 'bg-red-100', 'text-red-800', 'border-red-300', 'bg-green-100', 'text-green-800', 'border-green-300');
+                if(ans === 'balok') {
+                    audio.win(); fb.classList.add('bg-green-100', 'text-green-800', 'border-green-300');
+                    fb.innerHTML = `✅ <b>Betul Sekali!</b> Balok punya sisi yang datar (gepeng). Kalau ditaruh di bawah, menaranya bisa berdiri tegak dan kokoh.`;
+                    document.getElementById('hots-next').classList.remove('hidden');
+                    mascot.say("Pintar! Balok alasnya datar.");
+                } else {
+                    audio.wrong(); fb.classList.add('bg-red-100', 'text-red-800', 'border-red-300');
+                    fb.innerHTML = `🤔 <b>Ayo Pikirkan Lagi!</b> Bola itu bulat dan bisa menggelinding. Kalau ditaruh di bawah, menaranya bisa merosot dan roboh!`;
+                    mascot.say("Ups, bola kan suka menggelinding!");
+                }
+            }
+        };
+
+        const quizData = [
+            { q: "Benda manakah yang bentuknya KUBUS?", opts: [{t:"Dadu", v:true}, {t:"Bola Sepak", v:false}, {t:"Gelas", v:false}], exp: "Dadu berbentuk kubus karena semua sisinya kotak yang sama besar." },
+            { q: "Bangun yang punya sisi lengkung dan bisa menggelinding adalah...", opts: [{t:"Balok", v:false}, {t:"Kubus", v:false}, {t:"Bola", v:true}], exp: "Bola hanya punya satu sisi lengkung dan bulat sempurna." },
+            { q: "Berapa jumlah sudut (pojokan) pada Kubus?", opts: [{t:"0", v:false}, {t:"6", v:false}, {t:"8", v:true}], exp: "Kubus punya 8 sudut: 4 di atas dan 4 di bawah." },
+            { q: "Kotak sepatu di rumahmu biasanya berbentuk...", opts: [{t:"Balok", v:true}, {t:"Tabung", v:false}, {t:"Kerucut", v:false}], exp: "Kotak sepatu memanjang, jadi ia adalah Balok." },
+            { q: "Bangun ruang yang seperti topi ulang tahun disebut...", opts: [{t:"Bola", v:false}, {t:"Kerucut", v:true}, {t:"Balok", v:false}], exp: "Kerucut punya alas lingkaran dan bagian atas yang runcing." },
+            { q: "Kaleng susu kental manis berbentuk Tabung. Ia punya...", opts: [{t:"Sisi datar saja", v:false}, {t:"Sisi datar dan lengkung", v:true}, {t:"Pojok yang banyak", v:false}], exp: "Tabung punya 2 sisi datar (atas dan bawah) dan 1 sisi melengkung (badannya)." },
+            { q: "Mana yang BUKAN contoh Bola?", opts: [{t:"Kelereng", v:false}, {t:"Jeruk", v:false}, {t:"Kotak Susu", v:true}], exp: "Kotak susu adalah balok, bukan bola." },
+            { q: "Jika balok diletakkan di papan perosotan, ia akan...", opts: [{t:"Menggelinding cepat", v:false}, {t:"Meluncur saja (diam)", v:true}, {t:"Berputar-putar", v:false}], exp: "Balok tidak punya sisi lengkung, jadi tidak bisa menggelinding seperti roda." },
+            { q: "Andi bilang, 'Wah, mainanku tidak ada pojokannya sama sekali!'. Benda apa yang Andi pegang?", opts: [{t:"Kubus", v:false}, {t:"Bola", v:true}, {t:"Balok", v:false}], exp: "Bola tidak memiliki titik sudut (pojokan)." },
+            { q: "Benda apa yang bentuknya paling pas dipakai untuk roda mobil mainan?", opts: [{t:"Tabung (pendek)", v:true}, {t:"Kubus", v:false}, {t:"Kerucut", v:false}], exp: "Roda berbentuk tabung pendek agar bisa menggelinding dengan mulus." }
+        ];
+
+        const quiz = {
+            currentIdx: 0, score: 0,
+            start() { this.currentIdx = 0; this.score = 0; nav.go('page-kuis'); },
+            reset() { this.currentIdx = 0; this.score = 0; this.showQuestion(); },
+            showQuestion() {
+                document.getElementById('quiz-feedback').classList.add('hidden');
+                const q = quizData[this.currentIdx];
+                document.getElementById('quiz-current').innerText = this.currentIdx + 1;
+                document.getElementById('quiz-progress').style.width = `${((this.currentIdx)/10)*100}%`;
+                document.getElementById('quiz-question').innerText = q.q;
+                
+                const optContainer = document.getElementById('quiz-options'); optContainer.innerHTML = '';
+                let opts = [...q.opts].sort(() => 0.5 - Math.random());
+                opts.forEach(opt => {
+                    const btn = document.createElement('button');
+                    btn.className = "bg-white border-4 border-blue-300 p-5 rounded-2xl font-black text-xl text-blue-800 hover:bg-blue-50 transition shadow-sm hover:scale-105";
+                    btn.innerText = opt.t;
+                    btn.onclick = () => this.answer(opt.v, q.exp);
+                    optContainer.appendChild(btn);
+                });
+            },
+            answer(isCorrect, exp) {
+                const fb = document.getElementById('quiz-feedback'); fb.classList.remove('hidden');
+                if(isCorrect) {
+                    audio.win(); this.score += 10;
+                    document.getElementById('quiz-feedback-icon').innerText = '🌟';
+                    document.getElementById('quiz-feedback-title').innerText = 'Hebat! Betul!';
+                    document.getElementById('quiz-feedback-title').className = 'text-5xl font-black mb-3 text-green-500';
+                    mascot.cheer();
+                } else {
+                    audio.wrong();
+                    document.getElementById('quiz-feedback-icon').innerText = '💡';
+                    document.getElementById('quiz-feedback-title').innerText = 'Ayo Coba Lagi!';
+                    document.getElementById('quiz-feedback-title').className = 'text-5xl font-black mb-3 text-orange-500';
+                    mascot.say("Tidak apa-apa, ayo baca penjelasannya!");
+                }
+                document.getElementById('quiz-feedback-desc').innerText = exp;
+            },
+            next() {
+                audio.click(); this.currentIdx++;
+                if(this.currentIdx >= quizData.length) this.finish(); else this.showQuestion();
+            },
+            finish() {
+                app.saveToDB(state.user.name, state.user.class, this.score);
+                document.getElementById('result-score').innerText = this.score;
+                let stars = '';
+                if(this.score >= 80) { stars = '⭐⭐⭐'; audio.win(); mascot.say("Kamu Juara Sejati!"); }
+                else if(this.score >= 50) { stars = '⭐⭐'; mascot.say("Usaha yang Bagus!"); }
+                else { stars = '⭐'; mascot.say("Terus Berlatih ya!"); }
+                document.getElementById('result-stars').innerHTML = stars;
+                nav.go('page-hasil');
+            },
+            speakQuestion() { audio.speak(quizData[this.currentIdx].q); }
+        };
+
+        const guru = {
+            login() {
+                const pin = document.getElementById('guru-pin').value;
+                if(pin === '1234') {
+                    audio.win(); document.getElementById('guru-pin').value = ''; document.getElementById('guru-error').classList.add('hidden');
+                    this.renderData(); nav.go('page-guru-dashboard');
+                } else {
+                    audio.wrong(); document.getElementById('guru-error').classList.remove('hidden');
+                }
+            },
+            renderData() {
+                const db = JSON.parse(localStorage.getItem('bangunku_db') || '[]');
+                const tbody = document.getElementById('guru-table-body'); tbody.innerHTML = '';
+                if(db.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="4" class="p-4 text-center text-gray-500">Belum ada data siswa.</td></tr>'; return;
+                }
+                db.forEach((u, i) => {
+                    const tr = document.createElement('tr'); tr.className = 'border-b-2 border-gray-200 hover:bg-blue-50';
+                    tr.innerHTML = `<td class="p-4">${u.name}</td><td class="p-4">Kelas ${u.class}</td>
+                        <td class="p-4 font-black ${u.score >= 80 ? 'text-green-600' : 'text-orange-500'}">${u.score}</td>
+                        <td class="p-4"><button onclick="guru.deleteUser(${i})" class="text-red-500 hover:bg-red-100 px-3 py-1 rounded-lg border border-red-300 text-sm font-bold">Hapus</button></td>`;
+                    tbody.appendChild(tr);
+                });
+            },
+            deleteUser(index) {
+                if(confirm('Yakin ingin menghapus data siswa ini?')) {
+                    let db = JSON.parse(localStorage.getItem('bangunku_db') || '[]'); db.splice(index, 1);
+                    localStorage.setItem('bangunku_db', JSON.stringify(db)); this.renderData();
+                }
+            },
+            clearData() {
+                if(confirm('PERINGATAN: Hapus SEMUA data siswa?')) {
+                    localStorage.removeItem('bangunku_db'); this.renderData();
+                }
+            },
+            exportCSV() {
+                const db = JSON.parse(localStorage.getItem('bangunku_db') || '[]');
+                if(db.length === 0) return alert('Data kosong!');
+                let csv = 'Nama,Kelas,Skor Tertinggi,Terakhir Login\n';
+                db.forEach(row => csv += `"${row.name}","${row.class}","${row.score}","${row.lastLogin}"\n`);
+                const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement("a"); link.href = URL.createObjectURL(blob);
+                link.download = "data_siswa_bangunku.csv"; link.style.visibility = 'hidden';
+                document.body.appendChild(link); link.click(); document.body.removeChild(link);
+            }
+        };
+
+        window.onload = () => app.init();
+    </script>
+</body>
+</html>
